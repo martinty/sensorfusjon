@@ -31,7 +31,7 @@ def plot_cov_ellipse2d(
         edgecolor: Color = 'C0',
         facecolor: Color = 'none',
         **kwargs,  # other Ellipse keyword arguments
-        ) -> Optional[Ellipse]:
+) -> Optional[Ellipse]:
     """Plot a n_sigma covariance ellipse centered in mean into ax."""
     if ax is None:
         ax = plt.gca()
@@ -87,12 +87,12 @@ plt.show(block=False)
 # % make the functions to condition
 def condition_mean(x, z, P, H, R):
     # Hints: numpy.linalg, use @ for matrix multiplication (* is elementwise)
-    pass # TODO
+    pass  # TODO
 
 
 def condition_cov(P, H, R):
     # Hints: numpy.linalg, use @ for matrix multiplication (* is elementwise)
-    pass # TODO
+    pass  # TODO
 
 
 # % task 5 (f)
