@@ -1,4 +1,5 @@
 alabaster==0.7.12
+argon2-cffi==20.1.0
 astroid==2.4.2
 atomicwrites==1.4.0
 attrs==20.2.0
@@ -43,6 +44,7 @@ mccabe==0.6.1
 mistune==0.8.4
 nbconvert==5.6.1
 nbformat==5.0.7
+notebook==6.1.4
 numpy==1.19.1
 numpydoc==1.1.0
 packaging==20.4
@@ -54,6 +56,7 @@ pickleshare==0.7.5
 Pillow==7.2.0
 pkg-resources==0.0.0
 pluggy==0.13.1
+prometheus-client==0.8.0
 prompt-toolkit==3.0.7
 psutil==5.7.2
 ptyprocess==0.6.0
@@ -83,6 +86,7 @@ rope==0.17.0
 SciencePlots==1.0.4
 scipy==1.5.2
 SecretStorage==3.1.2
+Send2Trash==1.5.0
 six==1.15.0
 snowballstemmer==2.0.0
 sortedcontainers==2.2.2
@@ -95,6 +99,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 spyder==4.1.5
 spyder-kernels==1.9.4
+terminado==0.8.3
 testpath==0.4.4
 toml==0.10.1
 tornado==6.0.4
