@@ -38,7 +38,10 @@ class CartesianPosition:
         # TODO
         # x[0:2] is position
         # you do not need to care about sensor_state
-        return None
+        
+        z = x[:2]
+        
+        return z
 
     def H(self,
             x: np.ndarray,
@@ -50,7 +53,10 @@ class CartesianPosition:
         # x[0:2] is position
         # you do not need to care about sensor_state
         # if you need the size of the state dimension it is in self.state_dim
-        return None
+
+        H = np.eye(self.m, self.state_dim)
+
+        return H
 
     def R(self,
             x: np.ndarray,
@@ -62,4 +68,7 @@ class CartesianPosition:
         # TODO
         # you do not need to care about sensor_state
         # sigma is available as self.sigma, and @dataclass makes it available in the init class constructor
-        return None
+
+        R = self.sigma**2 * np.eye(2)
+
+        return R

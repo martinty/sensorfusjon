@@ -52,8 +52,8 @@ class EKF:
         F = self.dynamic_model.F(x, Ts)
         Q = self.dynamic_model.Q(x, Ts)
 
-        x_pred = None  # TODO
-        P_pred = None  # TODO
+        x_pred = self.dynamic_model.f(x, Ts)
+        P_pred = F @ P @ F.T + Q
 
         state_pred = GaussParams(x_pred, P_pred)
 
@@ -69,10 +69,8 @@ class EKF:
         """Calculate the innovation mean for ekfstate at z in sensor_state."""
 
         x = ekfstate.mean
-
-        zbar = None  # TODO predicted measurement
-
-        v = None  # TODO the innovation
+        zbar = self.sensor_model.h(x, sensor_state=sensor_state)  # TODO predicted measurement
+        v = z - zbar  # TODO the innovation
 
         return v
 
@@ -89,7 +87,7 @@ class EKF:
         H = self.sensor_model.H(x, sensor_state=sensor_state)
         R = self.sensor_model.R(x, sensor_state=sensor_state, z=z)
 
-        S = None  # TODO the innovation covariance
+        S = H @ P @ H.T + R  # TODO the innovation covariance
 
         return S
 
@@ -102,8 +100,8 @@ class EKF:
         """Calculate the innovation for ekfstate at z in sensor_state."""
 
         # TODO: reuse the above functions for the innovation and its covariance
-        v = None
-        S = None
+        v = self.innovation_mean(z, ekfstate, sensor_state=sensor_state)
+        S = self.innovation_cov(z, ekfstate, sensor_state=sensor_state)
 
         innovationstate = GaussParams(v, S)
 
@@ -122,10 +120,10 @@ class EKF:
 
         H = self.sensor_model.H(x, sensor_state=sensor_state)
 
-        W = None  # TODO: the kalman gain, Hint: la.solve, la.inv
+        W = P @ la.solve(S, H).T  # TODO: the kalman gain, Hint: la.solve, la.inv
 
-        x_upd = None  # TODO: the mean update
-        P_upd = None  # TODO: the covariance update
+        x_upd = x + W @ v  # TODO: the mean update
+        P_upd = P - W @ H @ P  # TODO: the covariance update
 
         ekfstate_upd = GaussParams(x_upd, P_upd)
 
@@ -142,8 +140,8 @@ class EKF:
         """Predict ekfstate Ts units ahead and then update this prediction with z in sensor_state."""
 
         # TODO: resue the above functions
-        ekfstate_pred = None  # TODO
-        ekfstate_upd = None  # TODO
+        ekfstate_pred = self.predict(ekfstate, Ts)
+        ekfstate_upd = self.update(z, ekfstate_pred, sensor_state=sensor_state)
         return ekfstate_upd
 
     def NIS(self,
@@ -156,7 +154,10 @@ class EKF:
 
         v, S = self.innovation(z, ekfstate, sensor_state=sensor_state)
 
-        NIS = None  # TODO
+        # TODO
+        cholS = la.cholesky(S, lower=True)
+        invcholS_v = la.solve_triangular(cholS, v, lower=True)
+        NIS = (invcholS_v ** 2).sum()
 
         return NIS
 
@@ -170,8 +171,12 @@ class EKF:
 
         x, P = ekfstate
 
-        x_diff = None  # Optional step
-        NEES = None  # TODO
+        # TODO
+        cholP = la.cholesky(P, lower=True)
+        x_diff = x - x_true # Optional step
+        invCholPdiff = la.solve_triangular(cholP, x_diff, lower=True)
+        NEES = (invCholPdiff ** 2).sum()
+
         return NEES
 
     def gate(self,
@@ -198,7 +203,13 @@ class EKF:
         v, S = self.innovation(z, ekfstate, sensor_state=sensor_state)
 
         # TODO: log likelihood, Hint: log(N(v, S))) -> NIS, la.slogdet.
-        ll = None
+        cholS = la.cholesky(S, lower=True)
+        invcholS_v = la.solve_triangular(cholS, v, lower=True)
+        NISby2 = (invcholS_v ** 2).sum() / 2
+        logdetSby2 = np.log(cholS)
+        ll = -(NISby2 + logdetSby2 + self._MLOG2PIby2)
+        
+        
 
         return ll
 
@@ -248,8 +259,13 @@ class EKF:
         # TODO loop over the data and get both the predicted and updated states in the lists
         # the predicted is good to have for evaluation purposes
         # A potential pythonic way of looping through  the data
+        # For the estimate sequence, the loop can among other ways be written as
         for k, (zk, Tsk, ssk) in enumerate(zip(Z, Ts_arr, sensor_state_seq)):
-            pass
+            ekfpred = self.predict(ekfupd, Tsk)
+            ekfupd = self.update(zk, ekfpred, sensor_state=ssk)
+            ekfpred_list[k] = ekfpred
+            ekfupd_list[k] = ekfupd
+
 
         return ekfpred_list, ekfupd_list
 

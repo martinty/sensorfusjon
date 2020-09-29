@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Dynamic models to be used with eg. EKF.
 
@@ -48,7 +46,11 @@ class WhitenoiseAccelleration:
         x[:2] is position, x[2:4] is velocity
         """
         # TODO
-        return None
+
+        x_p = x
+        x_p[:2] += Ts * x[2:]
+        
+        return x_p
 
     def F(self,
             x: np.ndarray,
@@ -56,7 +58,11 @@ class WhitenoiseAccelleration:
           ) -> np.ndarray:
         """ Calculate the transition function jacobian for Ts time units at x."""
         # TODO
-        return None
+        
+        F = np.eye(4)
+        F[[0, 1], [2, 3]] = Ts
+        
+        return F
 
     def Q(self,
             x: np.ndarray,
@@ -69,4 +75,19 @@ class WhitenoiseAccelleration:
         # Hint: sigma can be found as self.sigma, see variable declarations
         # Note the @dataclass decorates this class to create an init function that takes
         # sigma as a parameter, among other things.
-        return None
+
+        Q = np.zeros((4,4))
+
+        pos_idx = [0, 1]
+        vel_idx = [2, 3]
+
+        sigma2 = self.sigma**2
+        # diags
+        Q[pos_idx, pos_idx] = sigma2 * Ts**3 / 3
+        Q[vel_idx, vel_idx] = sigma2 * Ts
+
+        # off diags
+        Q[pos_idx, vel_idx] = sigma2 * Ts**2 / 2
+        Q[vel_idx, pos_idx] = sigma2 * Ts**2 / 2
+
+        return Q
