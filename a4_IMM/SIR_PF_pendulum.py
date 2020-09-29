@@ -97,16 +97,13 @@ ax2.set_ylabel("z")
 # %% Task: Estimate using a particle filter
 
 # number of particles to use
-N =  # TODO
+N = 300  # TODO
 
 # initialize particles, pretend you do not know where the pendulum starts
-px = np.array([
-    rng.  # TODO,
-    rng.  # TODO
-]).T
+px = np.array([rng.uniform(-np.pi, np.pi, N), rng.normal(0, np.pi / 4, N)]).T
 
 # initial weights
-w =  # TODO
+w = np.ones(N) / N
 
 # allocate some space for resampling particles
 pxn = np.zeros_like(px)
@@ -131,32 +128,33 @@ ax4.legend()
 
 eps = np.finfo(float).eps
 for k in range(K):
-    print(f"k = {k}")
+    print(f"k = { k} ")
     # weight update
     for n in range(N):
-        w[n] =  # TODO, hint: PF_measurement_distribution.pdf
-    w =  # TODO: normalize
+        w[n] = PF_measurement_distribution.pdf(Z[k] - h(px[n], Ld, l, Ll))
+    w = w / w.sum()
 
     # resample
-    # TODO: some pre calculations?
+    cumw = np.cumsum(w)
     i = 0
     for n in range(N):
-        # find a particle 'i' to pick
-        # algorithm in the book, but there are other options as well
+        u = (n + 1) / N - 10 * eps  # remove some eps for convergence
+        while u > cumw[i]:
+            i += 1
         pxn[n] = px[i]
 
     # trajecory sample prediction
     for n in range(n):
-        vkn =  # TODO: process noise, hint: PF_dynamic_distribution.rvs
-        px[n] =  # TODO: particle prediction
+        vkn = PF_dynamic_distribution.rvs()
+        px[n] = pendulum_dynamics_discrete(pxn[n], vkn, Ts, a, d)
 
-    # plot
-    sch_particles.set_offsets(np.c_[l * np.sin(pxn[:, 0]), -l * np.cos(pxn[:, 0])])
-    sch_true.set_offsets(np.c_[l * np.sin(x[k, 0]), -l * np.cos(x[k, 0])])
+# plot
+sch_particles.set_offsets(np.c_[l * np.sin(pxn[:, 0]), -l * np.cos(pxn[:, 0])])
+sch_true.set_offsets(np.c_[l * np.sin(x[k, 0]), -l * np.cos(x[k, 0])])
 
-    fig4.canvas.draw_idle()
-    plt.show(block=False)
-    plt.waitforbuttonpress(plotpause)
+fig4.canvas.draw_idle()
+plt.show(block=False)
+plt.waitforbuttonpress(plotpause)
 
 plt.waitforbuttonpress()
 # %%
