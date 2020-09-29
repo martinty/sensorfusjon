@@ -1,14 +1,9 @@
 {
     "python.pythonPath": "/home/martinty/Documents/sensorfusjon/env/bin/python3",
     "python.autoComplete.extraPaths": [
-        "/home/martinty/Documents/sensorfusjon/a5",
+        "/home/martinty/Documents/sensorfusjon/a5_PDA",
     ],
     "python.analysis.disabled": [
         "inherit-non-class"
-    ],
-    "files.watcherExclude": {
-        "**/.git/objects/**": true,
-        "**/.git/subtree-cache/**": true,
-        "**/__pycache__/**": true
-    }
+    ]
 }
