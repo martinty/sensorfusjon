@@ -87,6 +87,7 @@ SciencePlots==1.0.4
 scipy==1.5.2
 SecretStorage==3.1.2
 Send2Trash==1.5.0
+singledispatchmethod==1.0
 six==1.15.0
 snowballstemmer==2.0.0
 sortedcontainers==2.2.2
@@ -99,6 +100,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 spyder==4.1.5
 spyder-kernels==1.9.4
+style==1.1.0
 terminado==0.8.3
 testpath==0.4.4
 toml==0.10.1
@@ -108,6 +110,7 @@ typed-ast==1.4.1
 typing==3.7.4.3
 typing-extensions==3.7.4.3
 ujson==1.35
+update==0.0.1
 urllib3==1.25.10
 watchdog==0.10.3
 wcwidth==0.2.5
