@@ -92,13 +92,13 @@ CT = dynamicmodels.ConstantTurnrate(sigma_a_CT, sigma_omega)
 # make models
 filters = []
 filters.append(ekf.EKF(CV, measurement_model))
-filters.append(None) # TODO, so you understand what is going on here
+filters.append(None)  # TODO, so you understand what is going on here
 
 pred = []
 upd = []
 stats = []
 for ekf_filter in filters:
-    ekfpred_list, ekfupd_list = # TODO
+    ekfpred_list, ekfupd_list =  # TODO
     stats.append(
         ekf_filter.performance_stats_sequence(
             K=K,
@@ -119,15 +119,15 @@ print(stats[0].dtype.names)
 # errors
 err_pred = np.array([st["dists_pred"] for st in stats])
 err_upd = np.array([st["dists_upd"] for st in stats])
-RMSE_pred = np.sqrt((err_pred ** 2).mean(axis=1)) # not RMSE over monte carlo trials but time
-RMSE_upd = np.sqrt((err_upd ** 2).mean(axis=1)) # same as above
+RMSE_pred = np.sqrt((err_pred ** 2).mean(axis=1))  # not RMSE over monte carlo trials but time
+RMSE_upd = np.sqrt((err_upd ** 2).mean(axis=1))  # same as above
 
 
 # measurement consistency
 NIS = np.array([st["NIS"] for st in stats])
-ANIS = # TODO, hint mean
-CINIS = # TODO, hint scipy.stats.chi2.interval
-CIANIS = # TODO, hint [...].inteval
+ANIS =  # TODO, hint mean
+CINIS =  # TODO, hint scipy.stats.chi2.interval
+CIANIS =  # TODO, hint [...].inteval
 print(f"ANIS={ANIS} with CIANIS={CIANIS}")
 
 
@@ -168,7 +168,7 @@ sigma_a_CT = 1
 sigma_omega = 1
 PI = np.array([[1, 0], [0, 1]])  # TODO
 # Optional sanity check
-assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1" # RIGHT?? yes...
+assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"  # RIGHT?? yes...
 
 # make model
 measurement_model = measurementmodels.CartesianPosition(sigma_z, state_dim=5)
@@ -177,16 +177,16 @@ CT = dynamicmodels.ConstantTurnrate(sigma_a_CT, sigma_omega)
 ekf_filters = []
 # TODO fill in you filters
 # ekf_filters.append(...)
-imm_filter = None # TODO
+imm_filter = None  # TODO
 
-init_state = { # TODO
+init_state = {  # TODO
     "weight": np.array([0.5, 0.5]),  # Mode probs: optional
     "mean": [0, 0, 0, 0, 0],
     "cov": np.diag([1, 1, 1, 1, 1]) ** 2,
 }
 
 
-imm_preds, imm_upds, imm_ests = # TODO: perform estimate
+imm_preds, imm_upds, imm_ests =  # TODO: perform estimate
 
 # extract some data
 x_est = np.array([est.mean for est in imm_ests])
@@ -196,9 +196,9 @@ prob_est = np.array([upds.weights for upds in imm_upds])
 NISes_comb = [imm_filter.NISes(zk, pred_k) for zk, pred_k in zip(Z, imm_preds)]
 NIS = np.array([n[0] for n in NISes_comb])
 NISes = np.array([n[1] for n in NISes_comb])
-ANIS = # TODO
-CINIS = # TODO
-CIANIS = # TODO
+ANIS =  # TODO
+CINIS =  # TODO
+CIANIS =  # TODO
 print(f"ANIS={ANIS} with CIANIS={CIANIS}")
 
 # plot
@@ -237,16 +237,16 @@ CT = dynamicmodels.ConstantTurnrate(sigma_a_CT, sigma_omega)
 ekf_filters = []
 # TODO: add and create the filters
 # ekf_filters.append ...
-imm_filter = None # TODO
+imm_filter = None  # TODO
 
-init_state = { # TODO, pick something reasonoable
+init_state = {  # TODO, pick something reasonoable
     "weight": np.array([0.5, 0.5]),  # Mode probs: optional
     "mean": [0, 0, 0, 0, 0],
     "cov": np.diag([1, 1, 1, 1, 1]) ** 2,
 }
 
 
-imm_preds, imm_upds, imm_ests = # TODO
+imm_preds, imm_upds, imm_ests =  # TODO
 
 # extract some data
 x_est = np.array([est.mean for est in imm_ests])
@@ -255,9 +255,9 @@ mode_prob = np.array([upds.weights for upds in imm_upds])
 # consistency: NIS
 NISes_comb = (imm_filter.NISes(zk, pred_k) for zk, pred_k in zip(Z, imm_preds))
 NIS, NISes = [np.array(n) for n in zip(*NISes_comb)]
-ANIS = # TODO
-CINIS = # TODO
-CIANIS = # TODO
+ANIS =  # TODO
+CINIS =  # TODO
+CIANIS =  # TODO
 
 # consistency: NEES
 NEESes_comb_pred = (
@@ -265,15 +265,15 @@ NEESes_comb_pred = (
     for pred_k, x_true in zip(imm_preds, Xgt)
 )
 NEES_pred, NEESes_pred = (np.array(n) for n in zip(*NEESes_comb_pred))
-ANEES_pred = # TODO
+ANEES_pred =  # TODO
 NEESes_comb_upd = (
     imm_filter.NEESes(upd_k, x_true, idx=np.arange(4))
     for upd_k, x_true in zip(imm_upds, Xgt)
 )
 NEES_upd, NEESes_upd = (np.array(n) for n in zip(*NEESes_comb_upd))
-ANEES_upd = # TODO
-CINEES = # TODO
-CIANEES = # TODO
+ANEES_upd =  # TODO
+CINEES =  # TODO
+CIANEES =  # TODO
 print(f"ANIS={ANIS} and CIANEES={CIANIS}")
 print(f"ANEES_upd={ANEES_upd}, and CIANEES={CIANEES}")
 
@@ -286,8 +286,8 @@ pos_RMSE = np.sqrt(
 vel_RMSE = np.sqrt(
     np.mean(vel_err ** 2)
 )  # not true RMSE (which is over monte carlo simulations)
-pos_peak_deviation = # TODO
-vel_peak_deviation = # TODO
+pos_peak_deviation =  # TODO
+vel_peak_deviation =  # TODO
 
 # plot
 rmsestr = ", ".join(f"{num:.3f}" for num in (pos_RMSE, vel_RMSE))

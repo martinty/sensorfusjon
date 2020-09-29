@@ -18,9 +18,13 @@ d = 0.5  # dampening
 S = 5
 
 # disturbance PDF
-process_noise_sampler = lambda: rng.uniform(-S, S)
+
+
+def process_noise_sampler(): return rng.uniform(-S, S)
 
 # dynamic function
+
+
 def modulo2pi(x, idx=0):
     xmod = x
     xmod[idx] = (xmod[idx] + np.pi) % (2 * np.pi) - np.pi  # wrap to [-pi, pi]
@@ -34,7 +38,7 @@ def pendulum_dynamics(x, a, d=0):  # continuous dynamics
 
 def pendulum_dynamics_discrete(xk, vk, Ts, a, d=0):
     xkp1 = modulo2pi(xk + Ts * pendulum_dynamics(xk, a, d))  # euler discretize
-    xkp1[1] += Ts * vk  #  zero orde hold noise
+    xkp1[1] += Ts * vk  # zero orde hold noise
     return xkp1
 
 
@@ -64,9 +68,13 @@ Ll = 0
 r = 0.25
 
 # noise pdf
-measurement_noise_sampler = lambda: rng.triangular(-r, 0, r)
+
+
+def measurement_noise_sampler(): return rng.triangular(-r, 0, r)
 
 # measurement function
+
+
 def h(x, Ld, l, Ll):  # measurement function
     lcth = l * np.cos(x[0])
     lsth = l * np.sin(x[0])
@@ -89,16 +97,16 @@ ax2.set_ylabel("z")
 # %% Task: Estimate using a particle filter
 
 # number of particles to use
-N = # TODO
+N =  # TODO
 
 # initialize particles, pretend you do not know where the pendulum starts
 px = np.array([
-    rng. # TODO,
-    rng. # TODO
-    ]).T
+    rng.  # TODO,
+    rng.  # TODO
+]).T
 
 # initial weights
-w = # TODO
+w =  # TODO
 
 # allocate some space for resampling particles
 pxn = np.zeros_like(px)
@@ -127,7 +135,7 @@ for k in range(K):
     # weight update
     for n in range(N):
         w[n] =  # TODO, hint: PF_measurement_distribution.pdf
-    w = # TODO: normalize
+    w =  # TODO: normalize
 
     # resample
     # TODO: some pre calculations?
@@ -139,8 +147,8 @@ for k in range(K):
 
     # trajecory sample prediction
     for n in range(n):
-        vkn = # TODO: process noise, hint: PF_dynamic_distribution.rvs
-        px[n] = # TODO: particle prediction
+        vkn =  # TODO: process noise, hint: PF_dynamic_distribution.rvs
+        px[n] =  # TODO: particle prediction
 
     # plot
     sch_particles.set_offsets(np.c_[l * np.sin(pxn[:, 0]), -l * np.cos(pxn[:, 0])])

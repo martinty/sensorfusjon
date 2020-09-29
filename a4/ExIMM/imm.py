@@ -34,6 +34,8 @@ import discretebayes
 MT = TypeVar("MT")  # a type variable to be the mode type
 
 # %% IMM
+
+
 @dataclass
 class IMM(Generic[MT]):
     # The M filters the IMM relies on
@@ -86,7 +88,7 @@ class IMM(Generic[MT]):
         mix_probabilities: np.ndarray,
     ) -> List[MT]:
 
-        mixed_states = # TODO
+        mixed_states =  # TODO
         return mixed_states
 
     def mode_matched_prediction(
@@ -95,7 +97,7 @@ class IMM(Generic[MT]):
         # The sampling time
         Ts: float,
     ) -> List[MT]:
-        modestates_pred = # TODO
+        modestates_pred =  # TODO
         return modestates_pred
 
     def predict(
@@ -112,11 +114,11 @@ class IMM(Generic[MT]):
         """
 
         # TODO: proposed structure
-        predicted_mode_probability, mixing_probability = # TODO
+        predicted_mode_probability, mixing_probability =  # TODO
 
-        mixed_mode_states: List[MT] = # TODO
+        mixed_mode_states: List[MT] =  # TODO
 
-        predicted_mode_states = # TODO
+        predicted_mode_states =  # TODO
 
         predicted_immstate = MixtureParameters(
             predicted_mode_probability, predicted_mode_states
@@ -131,7 +133,7 @@ class IMM(Generic[MT]):
     ) -> List[MT]:
         """Update each mode in immstate with z in sensor_state."""
 
-        updated_state = # TODO
+        updated_state =  # TODO
 
         return updated_state
 
@@ -147,7 +149,7 @@ class IMM(Generic[MT]):
 
         # potential intermediate step logjoint =
 
-        updated_mode_probabilities = # TODO
+        updated_mode_probabilities =  # TODO
 
         # Optional debuging
         assert np.all(np.isfinite(updated_mode_probabilities))
@@ -163,8 +165,8 @@ class IMM(Generic[MT]):
     ) -> MixtureParameters[MT]:
         """Update the immstate with z in sensor_state."""
 
-        updated_weights = # TODO
-        updated_states = # TODO
+        updated_weights =  # TODO
+        updated_states =  # TODO
 
         updated_immstate = MixtureParameters(updated_weights, updated_states)
         return updated_immstate
@@ -178,8 +180,8 @@ class IMM(Generic[MT]):
     ) -> MixtureParameters[MT]:
         """Predict immstate with Ts time units followed by updating it with z in sensor_state"""
 
-        predicted_immstate = None # TODO
-        updated_immstate = None # TODO
+        predicted_immstate = None  # TODO
+        updated_immstate = None  # TODO
 
         return updated_immstate
 
@@ -193,9 +195,9 @@ class IMM(Generic[MT]):
 
         # THIS IS ONLY NEEDED FOR IMM-PDA. You can therefore wait if you prefer.
 
-        mode_conditioned_ll = None # TODO in for IMM-PDA
+        mode_conditioned_ll = None  # TODO in for IMM-PDA
 
-        ll = None # TODO
+        ll = None  # TODO
 
         return ll
 
@@ -211,10 +213,10 @@ class IMM(Generic[MT]):
         )
 
         # flip conditioning order with Bayes
-        mode_prob, mode_conditioned_component_prob = None # TODO
+        mode_prob, mode_conditioned_component_prob = None  # TODO
 
         # Hint list_a of lists_b to list_b of lists_a: zip(*immstate_mixture.components)
-        mode_states = None # TODO:
+        mode_states = None  # TODO:
 
         immstate_reduced = MixtureParameters(mode_prob, mode_states)
 
@@ -225,8 +227,8 @@ class IMM(Generic[MT]):
 
         # ! You can assume all the modes have the same reduce and estimate function
         # ! and use eg. self.filters[0] functionality
-        data_reduced = # TODO
-        estimate = # TODO
+        data_reduced =  # TODO
+        estimate =  # TODO
         return estimate
 
     def gate(
@@ -239,9 +241,9 @@ class IMM(Generic[MT]):
         """Check if z is within the gate of any mode in immstate in sensor_state"""
 
         # THIS IS ONLY NEEDED FOR PDA. You can wait with implementation if you want
-        gated_per_mode = None # TODO
+        gated_per_mode = None  # TODO
 
-        gated = None # TODO
+        gated = None  # TODO
         return gated
 
     def NISes(

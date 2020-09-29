@@ -1,5 +1,5 @@
-    @singledispatchmethod
-    def init_filter_state(self, init) -> None:
+  @singledispatchmethod
+   def init_filter_state(self, init) -> None:
         raise NotImplementedError(
             f"EKF do not know how to make {init} into GaussParams"
         )
