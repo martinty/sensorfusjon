@@ -56,7 +56,7 @@ if use_pregen:
     true_association = loaded_data["a"].ravel()
 else:
     x0 = np.array([0, 0, 1, 1, 0])
-    P0 = np.diag([50, 50, 10, 10, pi / 4]) ** 2
+    P0 = np.diag([50, 50, 10, 10, np.pi / 4]) ** 2
     # model parameters
     sigma_a_true = 0.25
     sigma_omega_true = np.pi / 15
@@ -103,12 +103,12 @@ for k, Zk in enumerate(Z):
     plt.show(block=False)
     plt.pause(plotpause)
 # %%
-sigma_a =  # TODO
-sigma_z =  # TODO
+sigma_a =  1 # TODO
+sigma_z =  1 # TODO
 
-PD =  # TODO
-clutter_intensity =  # TODO
-gate_size =  # TODO
+PD =  1 # TODO
+clutter_intensity =  1 # TODO
+gate_size =  1 # TODO
 
 dynamic_model = dynamicmodels.WhitenoiseAccelleration(sigma_a)
 measurement_model = measurementmodels.CartesianPosition(sigma_z)
@@ -135,19 +135,19 @@ tracker_update_list = []
 tracker_predict_list = []
 # estimate
 for k, (Zk, x_true_k) in enumerate(zip(Z, Xgt)):
-    tracker_predict =  # TODO
-    tracker_update =  # TODO
-    NEES[k] =  # TODO
-    NEESpos[k] =  # TODO
-    NEESvel[k] =  # TODO
+    tracker_predict = 1 # TODO
+    tracker_update = 1 # TODO
+    NEES[k] = 1 # TODO
+    NEESpos[k] = 1 # TODO
+    NEESvel[k] = 1 # TODO
 
     tracker_predict_list.append(tracker_predict)
     tracker_update_list.append(tracker_update)
 
 x_hat = np.array([upd.mean for upd in tracker_update_list])
 # calculate a performance metric
-posRMSE =  # TODO: position RMSE
-velRMSE =  # TODO: velocity RMSE
+posRMSE = 1 # TODO: position RMSE
+velRMSE = 1 # TODO: velocity RMSE
 
 # %% plots
 fig3, ax3 = plt.subplots(num=3, clear=True)
@@ -159,34 +159,34 @@ ax3.set_title(
 
 fig4, axs4 = plt.subplots(3, sharex=True, num=4, clear=True)
 
-confprob =  # TODO: probability for confidence interval
-CI2 =  # TODO: confidence interval for NEESpos and NEESvel
-CI4 =  # TODO: confidence interval for NEES
+confprob = 1 # TODO: probability for confidence interval
+CI2 = [1, 1] # TODO: confidence interval for NEESpos and NEESvel
+CI4 = [1, 1] # TODO: confidence interval for NEES
 
 axs4[0].plot(np.arange(K) * Ts, NEESpos)
-axs4[0].plot([0, (K - 1) * Ts], np.repeat(CI2[None], 2, 0), "--r")
+axs4[0].plot([0, (K - 1) * Ts], np.repeat(CI2[0], 2, 0), "--r")
 axs4[0].set_ylabel("NEES pos")
 inCIpos = np.mean((CI2[0] <= NEESpos) * (NEESpos <= CI2[1]))
 axs4[0].set_title(f"{inCIpos*100:.1f}% inside {confprob*100:.1f}% CI")
 
 axs4[1].plot(np.arange(K) * Ts, NEESvel)
-axs4[1].plot([0, (K - 1) * Ts], np.repeat(CI2[None], 2, 0), "--r")
+axs4[1].plot([0, (K - 1) * Ts], np.repeat(CI2[0], 2, 0), "--r")
 axs4[1].set_ylabel("NEES vel")
 inCIvel = np.mean((CI2[0] <= NEESvel) * (NEESvel <= CI2[1]))
 axs4[1].set_title(f"{inCIvel*100:.1f}% inside {confprob*100:.1f}% CI")
 
 axs4[2].plot(np.arange(K) * Ts, NEESpos)
-axs4[2].plot([0, (K - 1) * Ts], np.repeat(CI4[None], 2, 0), "--r")
+axs4[2].plot([0, (K - 1) * Ts], np.repeat(CI4[0], 2, 0), "--r")
 axs4[2].set_ylabel("NEES")
 inCI = np.mean((CI2[0] <= NEES) * (NEES <= CI2[1]))
 axs4[2].set_title(f"{inCI*100:.1f}% inside {confprob*100:.1f}% CI")
 
-confprob =  # TODO
-CI2K =  # TODO: ANEESpos and ANEESvel
-CI4K =  # TODO: NEES
-ANEESpos =  # TODO
-ANEESvel =  # TODO
-ANEES =  # TODO
+confprob = 1 # TODO
+CI2K = [1, 1] # TODO: ANEESpos and ANEESvel
+CI4K = [1, 1] # TODO: NEES
+ANEESpos = 1 # TODO
+ANEESvel = 1 # TODO
+ANEES = 1 # TODO
 print(f"ANEESpos = {ANEESpos:.2f} with CI = [{CI2K[0]:.2f}, {CI2K[1]:.2f}]")
 print(f"ANEESvel = {ANEESvel:.2f} with CI = [{CI2K[0]:.2f}, {CI2K[1]:.2f}]")
 print(f"ANEES = {ANEES:.2f} with CI = [{CI4K[0]:.2f}, {CI4K[1]:.2f}]")

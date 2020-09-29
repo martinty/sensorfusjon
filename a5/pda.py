@@ -36,7 +36,7 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         g_squared = self.gate_size ** 2
 
         # The loop can be done using ether of these: normal loop, list comprehension or map
-        gated =  # TODO: some for loop over elements of Z using self.state_filter.gate
+        gated = 1 # TODO: some for loop over elements of Z using self.state_filter.gate
 
         return gated
 
@@ -57,8 +57,8 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         ll = np.empty(Z.shape[0] + 1)
 
         # calculate log likelihood ratios
-        ll[0] =  # TODO: missed detection
-        ll[1:] =  # TODO: some for loop over elements of Z using self.state_filter.loglikelihood
+        ll[0] = 1 # TODO: missed detection
+        ll[1:] = 1 # TODO: some for loop over elements of Z using self.state_filter.loglikelihood
 
         return ll
 
@@ -76,7 +76,7 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         lls = self.loglikelihood_ratios(Z, filter_state, sensor_state=sensor_state)
 
         # probabilities
-        beta =  # TODO
+        beta = 1 # TODO
         return beta
 
     def conditional_update(
@@ -121,14 +121,14 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         Gate -> association probabilities -> conditional update -> reduce mixture.
         """
         # remove the not gated measurements from consideration
-        gated =  # TODO
+        gated = 1 # TODO
         Zg = Z[gated]
 
         # find association probabilities
-        beta =  # TODO
+        beta = 1 # TODO
 
         # find the mixture components
-        filter_state_updated_mixture_components =  # TODO
+        filter_state_updated_mixture_components = 1 # TODO
 
         # make mixture
         filter_state_update_mixture = MixtureParameters(
@@ -136,7 +136,7 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         )
 
         # reduce mixture
-        filter_state_updated_reduced =  # TODO
+        filter_state_updated_reduced = 1 # TODO
 
         return filter_state_updated_reduced
 
@@ -151,8 +151,8 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
     ) -> ET:
         """Perform a predict update cycle with Ts time units and measurements Z in sensor_state"""
 
-        filter_state_predicted =  # TODO
-        filter_state_updated =  # TODO
+        filter_state_predicted = 1 # TODO
+        filter_state_updated = 1 # TODO
         return filter_state_updated
 
     def estimate(self, filter_state: ET) -> GaussParams:
