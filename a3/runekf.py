@@ -42,7 +42,7 @@ except Exception as e:
 
 
 # %% get and plot the data
-data_path = 'a3/data_for_ekf.mat'
+data_path = 'data_for_ekf.mat'
 
 # TODO: choose this for the last task
 usePregen = True  # choose between own generated data and pre generated
