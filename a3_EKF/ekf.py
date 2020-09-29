@@ -55,6 +55,10 @@ class EKF:
         x_pred = self.dynamic_model.f(x, Ts)
         P_pred = F @ P @ F.T + Q
 
+        assert np.all(np.isfinite(P_pred)) and np.all(
+            np.isfinite(x_pred)
+        ), "Non-finite EKF prediction."
+
         state_pred = GaussParams(x_pred, P_pred)
 
         return state_pred
@@ -86,7 +90,6 @@ class EKF:
 
         H = self.sensor_model.H(x, sensor_state=sensor_state)
         R = self.sensor_model.R(x, sensor_state=sensor_state, z=z)
-
         S = H @ P @ H.T + R  # TODO the innovation covariance
 
         return S
@@ -115,11 +118,9 @@ class EKF:
         """Update ekfstate with z in sensor_state"""
 
         x, P = ekfstate
-
         v, S = self.innovation(z, ekfstate, sensor_state=sensor_state)
 
         H = self.sensor_model.H(x, sensor_state=sensor_state)
-
         W = P @ la.solve(S, H).T  # TODO: the kalman gain, Hint: la.solve, la.inv
 
         x_upd = x + W @ v  # TODO: the mean update
@@ -159,6 +160,9 @@ class EKF:
         invcholS_v = la.solve_triangular(cholS, v, lower=True)
         NIS = (invcholS_v ** 2).sum()
 
+        # alternative:
+        # NIS = v @ la.solve(S, v)
+
         return NIS
 
     @classmethod
@@ -173,7 +177,7 @@ class EKF:
 
         # TODO
         cholP = la.cholesky(P, lower=True)
-        x_diff = x - x_true # Optional step
+        x_diff = x - x_true  # Optional step
         invCholPdiff = la.solve_triangular(cholP, x_diff, lower=True)
         NEES = (invCholPdiff ** 2).sum()
 
@@ -204,12 +208,18 @@ class EKF:
 
         # TODO: log likelihood, Hint: log(N(v, S))) -> NIS, la.slogdet.
         cholS = la.cholesky(S, lower=True)
+
         invcholS_v = la.solve_triangular(cholS, v, lower=True)
         NISby2 = (invcholS_v ** 2).sum() / 2
-        logdetSby2 = np.log(cholS)
+        # alternative self.NIS(...) /2 or v @ la.solve(S, v)/2
+
+        logdetSby2 = np.log(cholS.diagonal()).sum()
+        # alternative use la.slogdet(S)
+
         ll = -(NISby2 + logdetSby2 + self._MLOG2PIby2)
-        
-        
+
+        # simplest overall alternative
+        # ll = scipy.stats.multivariate_normal.logpdf(v, cov=S)
 
         return ll
 
@@ -265,7 +275,6 @@ class EKF:
             ekfupd = self.update(zk, ekfpred, sensor_state=ssk)
             ekfpred_list[k] = ekfpred
             ekfupd_list[k] = ekfupd
-
 
         return ekfpred_list, ekfupd_list
 

@@ -101,8 +101,8 @@ print(ekf_filter)  # make use of the @dataclass automatic repr
 
 # initialize mean and covariance
 # TODO: ArrayLike (list, np. array, tuple, ...) with 4 elements
-x_bar_init = None
-P_bar_init = None  # TODO: ArrayLike with 4 x 4 elements, hint: np.diag
+x_bar_init = np.zeros(4)
+P_bar_init = np.eye(4, 4)  # TODO: ArrayLike with 4 x 4 elements, hint: np.diag
 init_ekfstate = ekf.GaussParams(x_bar_init, P_bar_init)
 
 # estimate
@@ -162,7 +162,7 @@ for i, sigma_a in enumerate(sigma_a_list):
         measmod = measurmentmodels.CartesianPosition(sigma_z)
         ekf_filter = ekf.EKF(dynmod, measmod)
         ekfpred_list, ekfupd_list = ekf_filter.estimate_sequence(
-        Z, init_ekfstate, Ts)
+            Z, init_ekfstate, Ts)
         stats_array[i, j] = ekf_filter.performance_stats_sequence(
             K, Z=Z, ekfpred_list=ekfpred_list, ekfupd_list=ekfupd_list, X_true=Xgt[:, :4],
             norm_idxs=[[0, 1], [2, 3]], norms=[2, 2]
@@ -181,7 +181,7 @@ ANIS = stats_array['NIS'].mean(axis=2)
 # %% find confidence regions for NIS and plot
 confprob = 0.9  # TODO number to use for confidence interval
 # TODO confidence intervall for NIS, hint: scipy.stats.chi2.interval
-CINIS = np.array(scipy.stats.chi2.interval(0.9, 2*K)) / K 
+CINIS = np.array(scipy.stats.chi2.interval(0.9, 2*K)) / K
 print(CINIS)
 
 # plot
