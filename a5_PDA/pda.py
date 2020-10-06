@@ -157,13 +157,15 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
     ) -> ET:
         """Perform a predict update cycle with Ts time units and measurements Z in sensor_state"""
 
-        filter_state_predicted = 1  # TODO
-        filter_state_updated = 1  # TODO
+        # TODO
+        filter_state_predicted = self.predict(filter_state, Ts)
+        filter_state_updated = self.update(Z, filter_state_predicted, sensor_state=sensor_state)
         return filter_state_updated
 
     def estimate(self, filter_state: ET) -> GaussParams:
         """Get an estimate with its covariance from the filter state."""
-        return  # TODO: remember to use self.state_filter to keep it working for both EKF and IMM
+        # TODO: remember to use self.state_filter to keep it working for both EKF and IMM
+        return self.state_filter.estimate(filter_state)
 
     def init_filter_state(
         self,

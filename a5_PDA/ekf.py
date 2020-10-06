@@ -10,7 +10,7 @@ S is the innovation covariance
 """
 # %% Imports
 # types
-from typing import Union, Callable, Any, Dict, Optional, List, Sequence, Tuple, Iterable
+from typing import Union, Callable, Any, Dict, Optional, List, Sequence, Tuple, Iterable, TypeVar
 from typing_extensions import Final
 
 # packages
@@ -25,9 +25,10 @@ import measurementmodels as measmods
 from gaussparams import GaussParams, GaussParamList
 from mixturedata import MixtureParameters
 import mixturereduction
+from estimationstatistics import mahalanobis_distance_squared
 
 # %% The EKF
-
+ET = TypeVar("ET")
 
 @dataclass
 class EKF:
@@ -168,10 +169,44 @@ class EKF:
         # NIS = v @ la.solve(S, v)
         return NIS
 
+    def NEES(
+        self,
+        z: np.ndarray,
+        ekfstate: GaussParams,
+        *,
+        sensor_state: Dict[str, Any] = None,
+    ) -> float:
+        """Calculate the normalized estimated error squared for ekfstate
+            Predicted state is inputted for ekfstate
+        """
+        # todo check this func
+        x_true, P = self.update(z, ekfstate, sensor_state)
+        state_diff = ekfstate.mean - x_true
+        NEES = state_diff @ la.solve(P, state_diff)  # No need to specify state_diff.T for la.solve
+        return NEES
+
+    def NEES_from_gt(self, x_pred: np.ndarray, x_gt: np.ndarray, cov_matr: np.ndarray) -> float:
+        return mahalanobis_distance_squared(x_pred, x_gt, cov_matr)
+
+
     @classmethod
     def estimate(cls, ekfstate: GaussParams):
         """Get the estimate from the state with its covariance. (Compatibility method)"""
         return ekfstate
+
+    def gate(self, z: np.ndarray, ekfstate: GaussParams, gate_size: float, sensor_state: Dict[str, Any] = None,) -> \
+            bool:
+        """
+        Check if z is within the gate of any mode in ekfstate in sensor_state
+        We assume ekfstate to be x_pred_k_k-1 and pred covariance P_k_k-1
+        Gate/validate measurements: (z-h(x))'S^(-1)(z-h(x)) <= g^2.
+
+        :param gate_size: NOT SQUARED -> Square the input gate_size for ellipse
+        :return: bool
+        """
+        nis = self.NIS(z, ekfstate, sensor_state=sensor_state)
+        return nis < gate_size ** 2
+
 
     def loglikelihood(
         self,
