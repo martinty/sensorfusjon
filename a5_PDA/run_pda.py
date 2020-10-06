@@ -90,18 +90,19 @@ ax1.set_title("True trajectory and the nearby measurements")
 # I do not think you can run this with inline plotting. '%matplotlib' in the console to make it external
 # Remember that you can exit the figure.
 # comment this out when you are
-fig2, ax2 = plt.subplots(num=2, clear=True)
-sh = ax2.scatter(np.nan, np.nan)
-th = ax2.set_title(f"measurements at step 0")
-ax2.axis([0, 700, -100, 300])
-plotpause = 0.003
+
+# fig2, ax2 = plt.subplots(num=2, clear=True)
+# sh = ax2.scatter(np.nan, np.nan)
+# th = ax2.set_title(f"measurements at step 0")
+# ax2.axis([0, 700, -100, 300])
+# plotpause = 0.003
 # sets a pause in between time steps if it goes to fast
-for k, Zk in enumerate(Z):
-    sh.set_offsets(Zk)
-    th.set_text(f"measurements at step {k}")
-    fig2.canvas.draw_idle()
-    plt.show(block=False)
-    plt.pause(plotpause)
+# for k, Zk in enumerate(Z):
+#    sh.set_offsets(Zk)
+#    th.set_text(f"measurements at step {k}")
+#    fig2.canvas.draw_idle()
+#    plt.show(block=False)
+#    plt.pause(plotpause)
 # %%
 sigma_a = 0.2  # TODO
 sigma_z = 3  # TODO

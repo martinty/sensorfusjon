@@ -42,6 +42,9 @@ class EKF:
     def __post_init__(self) -> None:
         self._MLOG2PIby2: Final[float] = self.sensor_model.m * np.log(2 * np.pi) / 2
 
+    def init_filter_state(self, init_state: "ET_like"):
+        return GaussParams(init_state['mean'], init_state['cov'])
+
     def predict(
         self,
         ekfstate: GaussParams,
@@ -127,8 +130,14 @@ class EKF:
         W = P @ la.solve(S, H).T
 
         x_upd = x + W @ v
-        P_upd = P - W @ H @ P
 
+        # Joseph form (I - W_k H) P_{k|k-1} (I - W_k H)^T + WRW^T
+        id_matr = np.eye(self.dynamic_model.n)
+        first_term_P = id_matr - W@H
+        R = self.sensor_model._R # (None, None, sensor_state=sensor_state)
+        P_upd = first_term_P @ P @ first_term_P.T + W @ R @ W.T # P - W @ H @ P
+
+        # P_compare = P - W @ H @ P
         ekfstate_upd = GaussParams(x_upd, P_upd)
 
         return ekfstate_upd
@@ -188,7 +197,6 @@ class EKF:
     def NEES_from_gt(self, x_pred: np.ndarray, x_gt: np.ndarray, cov_matr: np.ndarray) -> float:
         return mahalanobis_distance_squared(x_pred, x_gt, cov_matr)
 
-
     @classmethod
     def estimate(cls, ekfstate: GaussParams):
         """Get the estimate from the state with its covariance. (Compatibility method)"""
@@ -206,7 +214,6 @@ class EKF:
         """
         nis = self.NIS(z, ekfstate, sensor_state=sensor_state)
         return nis < gate_size ** 2
-
 
     def loglikelihood(
         self,
