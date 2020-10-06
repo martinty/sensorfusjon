@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import scipy
 import scipy.special
+from scipy.special import logsumexp
 
 from estimatorduck import StateEstimator
 from mixturedata import MixtureParameters
@@ -20,7 +21,8 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
 
     def predict(self, filter_state: ET, Ts: float) -> ET:
         """Predict state estimate Ts time units ahead"""
-        return  # TODO
+        # TODO
+        return self.state_filter.predict(filter_state, Ts)
 
     def gate(
         self,
@@ -36,7 +38,10 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         g_squared = self.gate_size ** 2
 
         # The loop can be done using ether of these: normal loop, list comprehension or map
-        gated = 1  # TODO: some for loop over elements of Z using self.state_filter.gate
+        # TODO: some for loop over elements of Z using self.state_filter.gate
+
+        gated = [self.state_filter.gate(meas, filter_state, self.gate_size, sensor_state=sensor_state)
+                 for meas in Z]
 
         return gated
 
@@ -57,8 +62,10 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         ll = np.empty(Z.shape[0] + 1)
 
         # calculate log likelihood ratios
-        ll[0] = 1  # TODO: missed detection
-        ll[1:] = 1  # TODO: some for loop over elements of Z using self.state_filter.loglikelihood
+        # TODO
+        ll[0] = log_clutter + log_PND
+        ll[1:] = log_PD + [self.state_filter.loglikelihood(meas, filter_state, sensor_state=sensor_state) for
+                           meas in Z]
 
         return ll
 
@@ -76,7 +83,8 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         lls = self.loglikelihood_ratios(Z, filter_state, sensor_state=sensor_state)
 
         # probabilities
-        beta = 1  # TODO
+        # TODO
+        beta = np.exp(lls - logsumexp(lls))
         return beta
 
     def conditional_update(
@@ -91,13 +99,11 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
     ]:  # Updated filter_state for all association events, first element is no detection
         """Update the state with all possible measurement associations."""
 
-        conditional_update = []
-        conditional_update.append(
-            # TODO: missed detection
-        )
-        conditional_update.extend(
-            # TODO: some loop over Z making a list of updates
-        )
+        # TODO
+        conditional_update_no_det = filter_state
+        conditional_update_det = [self.state_filter.update(meas, filter_state, sensor_state=sensor_state)
+                                  for meas in Z]
+        conditional_update = [conditional_update_no_det] + conditional_update_det
 
         return conditional_update
 
@@ -105,7 +111,8 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
         self, mixture_filter_state: MixtureParameters[ET]
     ) -> ET:  # the two first moments of the mixture
         """Reduce a Gaussian mixture to a single Gaussian."""
-        return  # TODO: utilize self.state_filter to keep this working for both EKF and IMM
+        # TODO: utilize self.state_filter to keep this working for both EKF and IMM
+        return self.state_filter.reduce_mixture(mixture_filter_state)
 
     def update(
         self,
@@ -120,23 +127,22 @@ class PDA(Generic[ET]):  # Probabilistic Data Association
 
         Gate -> association probabilities -> conditional update -> reduce mixture.
         """
-        # remove the not gated measurements from consideration
-        gated = 1  # TODO
+        # remove the not gated measurements from consideration  # TODO
+        gated = self.gate(Z, filter_state, sensor_state=sensor_state)
         Zg = Z[gated]
 
-        # find association probabilities
-        beta = 1  # TODO
+        # find association probabilities # TODO
+        beta = self.association_probabilities(Zg, filter_state, sensor_state=sensor_state)
 
-        # find the mixture components
-        filter_state_updated_mixture_components = 1  # TODO
+        # find the mixture components  # TODO
+        filter_state_updated_mixture_components = self.conditional_update(
+            Zg, filter_state, sensor_state=sensor_state)
 
-        # make mixture
-        filter_state_update_mixture = MixtureParameters(
-            beta, filter_state_update_mixture_components
-        )
+        # make mixture  # TODO
+        filter_state_updated_mixture = MixtureParameters(beta, filter_state_updated_mixture_components)
 
-        # reduce mixture
-        filter_state_updated_reduced = 1  # TODO
+        # reduce mixture  # TODO
+        filter_state_updated_reduced = self.reduce_mixture(filter_state_updated_mixture)
 
         return filter_state_updated_reduced
 
