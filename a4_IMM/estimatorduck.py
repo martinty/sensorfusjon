@@ -1,5 +1,5 @@
 # %%
-from typing import Dict, Any, Generic, TypeVar
+from typing import Dict, Any, Generic, TypeVar, Optional
 from typing_extensions import Protocol, runtime
 
 from mixturedata import MixtureParameters
@@ -17,21 +17,33 @@ class StateEstimator(Protocol[T]):
         ...
 
     def update(
-        self, z: np.ndarray, eststate: T, *, sensor_state: Dict[str, Any] = None
+        self,
+        z: np.ndarray,
+        eststate: T,
+        *,
+        sensor_state: Optional[Dict[str, Any]] = None,
     ) -> T:
         ...
 
-    def step(self, z: np.ndarray, eststate: T, Ts: float) -> T:
+    def step(
+        self,
+        z: np.ndarray,
+        eststate: T,
+        Ts: float,
+        *,
+        sensor_state: Optional[Dict[str, Any]] = None,
+    ) -> T:
         ...
 
-    def estimate(self, estastate: T) -> GaussParams:
-        ...
-
-    def init_filter_state(self, init: Any) -> T:
+    def estimate(self, eststate: T) -> GaussParams:
         ...
 
     def loglikelihood(
-        self, z: np.ndarray, eststate: T, *, sensor_state: Dict[str, Any] = None
+        self,
+        z: np.ndarray,
+        eststate: T,
+        *,
+        sensor_state: Optional[Dict[str, Any]] = None,
     ) -> float:
         ...
 
@@ -42,8 +54,8 @@ class StateEstimator(Protocol[T]):
         self,
         z: np.ndarray,
         eststate: T,
-        gate_size: float,
+        gate_size_square: float,
         *,
-        sensor_state: Dict[str, Any] = None
+        sensor_state: Optional[Dict[str, Any]] = None,
     ) -> bool:
         ...

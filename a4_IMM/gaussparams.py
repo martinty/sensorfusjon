@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Tuple
 from dataclasses import dataclass
 from mytypes import ArrayLike
 import numpy as np
@@ -7,14 +7,12 @@ import numpy as np
 @dataclass(init=False)
 class GaussParams:
     """A class for holding Gaussian parameters"""
-    __slots__ = ['mean', 'cov']
+
+    __slots__ = ["mean", "cov"]
     mean: np.ndarray  # shape=(n,)
     cov: np.ndarray  # shape=(n, n)
 
-    def __init__(self,
-                 mean: ArrayLike,
-                 cov: ArrayLike
-                 ) -> None:
+    def __init__(self, mean: ArrayLike, cov: ArrayLike) -> None:
         self.mean = np.asarray(mean, dtype=float)
         self.cov = np.asarray(cov, dtype=float)
 
@@ -24,7 +22,7 @@ class GaussParams:
 
 @dataclass(init=False)
 class GaussParamList:
-    __slots__ = ['mean', 'cov']
+    __slots__ = ["mean", "cov"]
     mean: np.ndarray  # shape=(N, n)
     cov: np.ndarray  # shape=(N, n, n)
 
@@ -37,16 +35,19 @@ class GaussParamList:
             pass
 
     @classmethod
-    def allocate(cls,
-                 N: int,  # list length
-                 n: int,  # dimension
-                 fill: Optional[float] = None,   # fill the allocated arrays
-                 ) -> 'GaussParamList':
+    def allocate(
+        cls,
+        shape: Union[int, Tuple[int, ...]],  # list shape
+        n: int,  # dimension
+        fill: Optional[float] = None,  # fill the allocated arrays
+    ) -> "GaussParamList":
+        if isinstance(shape, int):
+            shape = (shape,)
 
         if fill is None:
-            return cls(np.empty((N, n)), np.empty((N, n, n)))
+            return cls(np.empty((*shape, n)), np.empty((*shape, n, n)))
         else:
-            return cls(np.full((N, n), fill), np.full((N, n, n), fill))
+            return cls(np.full((*shape, n), fill), np.full((*shape, n, n), fill))
 
     def __getitem__(self, key):
         theCls = GaussParams if isinstance(key, int) else GaussParamList
@@ -59,8 +60,7 @@ class GaussParamList:
             self.mean[key] = value.mean
             self.cov[key] = value.cov
         else:
-            raise NotImplementedError(
-                f'Cannot set from type {value}')
+            raise NotImplementedError(f"Cannot set from type {value}")
 
     def __len__(self):
         return self.mean.shape[0]

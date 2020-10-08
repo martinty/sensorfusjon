@@ -25,10 +25,10 @@ def discrete_bayes(
         where=marginal[None] > 0,
     )
 
-    # flip axes?? (n, m) -> (m, n)
+    # flip axes
     conditional = conditional.T
 
-    # optional DEBUG
+    # DEBUG
     assert np.all(
         np.isfinite(conditional)
     ), f"NaN or inf in conditional in discrete bayes"

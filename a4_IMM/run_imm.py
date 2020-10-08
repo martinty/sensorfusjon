@@ -1,4 +1,5 @@
 # %% imports
+from typing import List
 import numpy as np
 import scipy
 import scipy.io
@@ -6,6 +7,7 @@ import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
 
+from estimatorduck import StateEstimator
 from gaussparams import GaussParams
 from mixturedata import MixtureParameters
 import dynamicmodels
@@ -14,7 +16,6 @@ import imm
 import ekf
 import estimationstatistics as estats
 
-
 # %% plot config check and style setup
 
 # to see your plot config
@@ -22,6 +23,22 @@ print(f"matplotlib backend: {matplotlib.get_backend()}")
 print(f"matplotlib config file: {matplotlib.matplotlib_fname()}")
 print(f"matplotlib config dir: {matplotlib.get_configdir()}")
 plt.close("all")
+
+# try to set separate window ploting
+if "inline" in matplotlib.get_backend():
+    print("Plotting is set to inline at the moment:", end=" ")
+
+    if "ipykernel" in matplotlib.get_backend():
+        print("backend is ipykernel (IPython?)")
+        print("Trying to set backend to separate window:", end=" ")
+        import IPython
+
+        IPython.get_ipython().run_line_magic("matplotlib", "")
+    else:
+        print("unknown inline backend")
+
+print("continuing with this plotting backend", end="\n\n\n")
+
 
 # set styles
 try:
@@ -48,7 +65,6 @@ except Exception as e:
             "legend.numpoints": 1,
         }
     )
-
 # %% load data
 use_pregen = True
 # you can generate your own data if set to false
@@ -145,13 +161,13 @@ for i, (ekf_filter, init) in enumerate(zip(filters, init_states)):
     P_hat = np.array([u.cov for u in ekfupd_list])
 
     # calculate metrics
-    NEES_pred[i] = estats.NEES_sequence_indexed(x_bar, P_bar, Xgt, idxs=np.arange(4))
-    NEES_upd[i] = estats.NEES_sequence_indexed(x_hat, P_hat, Xgt, idxs=np.arange(4))
+    NEES_pred[i] = estats.NEES_sequence(x_bar, P_bar, Xgt, idxs=np.arange(4))
+    NEES_upd[i] = estats.NEES_sequence(x_hat, P_hat, Xgt, idxs=np.arange(4))
 
-    err_pred[i, 0] = estats.distance_sequence_indexed(x_bar, Xgt, np.arange(2))
-    err_pred[i, 1] = estats.distance_sequence_indexed(x_bar, Xgt, np.arange(2, 4))
-    err_upd[i, 0] = estats.distance_sequence_indexed(x_hat, Xgt, np.arange(2))
-    err_upd[i, 1] = estats.distance_sequence_indexed(x_hat, Xgt, np.arange(2, 4))
+    err_pred[i, 0] = estats.distance_sequence(x_bar, Xgt, np.arange(2))
+    err_pred[i, 1] = estats.distance_sequence(x_bar, Xgt, np.arange(2, 4))
+    err_upd[i, 0] = estats.distance_sequence(x_hat, Xgt, np.arange(2))
+    err_upd[i, 1] = estats.distance_sequence(x_hat, Xgt, np.arange(2, 4))
 
 
 # errors
@@ -208,10 +224,10 @@ assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"
 measurement_model = measurementmodels.CartesianPosition(sigma_z, state_dim=5)
 CV = dynamicmodels.WhitenoiseAccelleration(sigma_a_CV, n=5)
 CT = dynamicmodels.ConstantTurnrate(sigma_a_CT, sigma_omega)
-ekf_filters = []
+ekf_filters: List[StateEstimator[GaussParams]] = []
 ekf_filters.append(ekf.EKF(CV, measurement_model))
 ekf_filters.append(ekf.EKF(CT, measurement_model))
-imm_filter = imm.IMM(ekf_filters, PI)
+imm_filter: imm.IMM[GaussParams] = imm.IMM(ekf_filters, PI)
 
 init_weights = np.array([0.5] * 2)
 init_mean = [0] * 5
@@ -325,27 +341,22 @@ P_hat_modes = np.array([[comp.cov for comp in pr.components] for pr in imm_upds]
 mode_prob = np.array([upds.weights for upds in imm_upds])
 
 # consistency: NIS
-NISes_comb = (imm_filter.NISes(zk, pred_k) for zk, pred_k in zip(Z, imm_preds))
+NISes_comb = [imm_filter.NISes(zk, pred_k) for zk, pred_k in zip(Z, imm_preds)]
 NIS, NISes = [np.array(n) for n in zip(*NISes_comb)]
 ANIS = NIS.mean()
 CINIS = np.array(scipy.stats.chi2.interval(0.9, 2))
 CIANIS = np.array(scipy.stats.chi2.interval(0.9, 2 * K)) / K
 
 # consistency: NEES
-NEES_pred = estats.NEES_sequence_indexed(x_bar, P_bar, Xgt, idxs=np.arange(4))
-NEESes_pred = np.array(
-    [
-        estats.NEES_sequence_indexed(x, P, Xgt, idxs=np.arange(4))
-        for x, P in zip(x_bar_modes, P_bar_modes)
-    ]
+NEES_pred = estats.NEES_sequence(x_bar, P_bar, Xgt, idxs=np.arange(4))
+NEESes_pred = estats.NEES_sequence(
+    x_bar_modes, P_bar_modes, Xgt[:, None], idxs=np.arange(4)
 )
-NEES_upd = estats.NEES_sequence_indexed(x_hat, P_hat, Xgt, idxs=np.arange(4))
-NEESes_upd = np.array(
-    [
-        estats.NEES_sequence_indexed(x, P, Xgt, idxs=np.arange(4))
-        for x, P in zip(x_hat_modes, P_hat_modes)
-    ]
+NEES_upd = estats.NEES_sequence(x_hat, P_hat, Xgt, idxs=np.arange(4))
+NEESes_upd = estats.NEES_sequence(
+    x_hat_modes, P_hat_modes, Xgt[:, None], idxs=np.arange(4)
 )
+
 
 ANEES_pred = NEES_pred.mean()
 ANEES_upd = NEES_upd.mean()
@@ -356,9 +367,9 @@ print(f"ANIS={ANIS} and CIANIS={CIANIS}")
 print(f"ANEES_upd={ANEES_upd}, ANEES_pred={ANEES_pred} and CIANEES={CIANEES}")
 
 #  errors
-pos_err = estats.distance_sequence_indexed(x_hat, Xgt, idxs=np.arange(2))
+pos_err = estats.distance_sequence(x_hat, Xgt, idxs=np.arange(2))
 # np.sqrt(np.sum((x_est[:, :2] - Xgt[:, :2]) ** 2, axis=1))
-vel_err = estats.distance_sequence_indexed(x_hat, Xgt, idxs=np.arange(2, 4))
+vel_err = estats.distance_sequence(x_hat, Xgt, idxs=np.arange(2, 4))
 # np.sqrt(np.sum((x_est[:, 2:4] - Xgt[:, 2:4]) ** 2, axis=1))
 pos_RMSE = np.sqrt(
     np.mean(pos_err ** 2)
@@ -420,6 +431,4 @@ axs6[1, 1].plot([0, Ts * (K - 1)], np.repeat(CINEES[None], 2, 0), "r--")
 axs6[1, 1].set_ylim([0, 2 * CINEES[1]])
 # axs6[1, 1].text(K * Ts * 1.1, -2, f"{ratio_in_CI_nees}% inside CI", rotation=90)
 
-# %%
-
-# %%
+plt.show()
