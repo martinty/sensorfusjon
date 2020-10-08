@@ -184,16 +184,9 @@ for k, (Zk, x_true_k) in enumerate(zip(Z, Xgt)):
     # You can look at the prediction estimate as well
     tracker_estimate = tracker.estimate(tracker_update)
 
-    NEES[k] = estats.NEES_indexed(
-        tracker_estimate.mean, tracker_estimate.cov, x_true_k, idxs=np.arange(4)
-    )
-
-    NEESpos[k] = estats.NEES_indexed(
-        tracker_estimate.mean, tracker_estimate.cov, x_true_k, idxs=np.arange(2)
-    )
-    NEESvel[k] = estats.NEES_indexed(
-        tracker_estimate.mean, tracker_estimate.cov, x_true_k, idxs=np.arange(2, 4)
-    )
+    NEES[k] = estats.NEES(*tracker_estimate, x_true_k, idxs=np.arange(4))
+    NEESpos[k] = estats.NEES(*tracker_estimate, x_true_k, idxs=np.arange(2))
+    NEESvel[k] = estats.NEES(*tracker_estimate, x_true_k, idxs=np.arange(2, 4))
 
     tracker_predict_list.append(tracker_predict)
     tracker_update_list.append(tracker_update)
