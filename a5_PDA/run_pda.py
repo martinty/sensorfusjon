@@ -90,26 +90,30 @@ ax1.set_title("True trajectory and the nearby measurements")
 # I do not think you can run this with inline plotting. '%matplotlib' in the console to make it external
 # Remember that you can exit the figure.
 # comment this out when you are
-
-# fig2, ax2 = plt.subplots(num=2, clear=True)
-# sh = ax2.scatter(np.nan, np.nan)
-# th = ax2.set_title(f"measurements at step 0")
-# ax2.axis([0, 700, -100, 300])
-# plotpause = 0.003
+"""
+fig2, ax2 = plt.subplots(num=2, clear=True)
+sh = ax2.scatter(np.nan, np.nan)
+th = ax2.set_title(f"measurements at step 0")
+ax2.axis([0, 700, -100, 300])
+plotpause = 0.003
 # sets a pause in between time steps if it goes to fast
-# for k, Zk in enumerate(Z):
-#    sh.set_offsets(Zk)
-#    th.set_text(f"measurements at step {k}")
-#    fig2.canvas.draw_idle()
-#    plt.show(block=False)
-#    plt.pause(plotpause)
+for k, Zk in enumerate(Z):
+    sh.set_offsets(Zk)
+    th.set_text(f"measurements at step {k}")
+    fig2.canvas.draw_idle()
+    plt.show(block=False)
+    plt.pause(plotpause)
 # %%
-sigma_a = 0.2  # TODO
-sigma_z = 3  # TODO
+"""
 
-PD = 0.6  # TODO
-clutter_intensity = 10e-10  # TODO
-gate_size = 0.3  # TODO
+# Model parameters EKF
+sigma_a = 6  # From EKF exc 3
+sigma_z = 4  # From EKF exc 3
+
+# PDA relevant
+PD = 0.6
+clutter_intensity = 10e-10  # TODO # Basically estimated from poisson clutter model, makes no sense to have fixed one
+gate_size = 2
 
 dynamic_model = dynamicmodels.WhitenoiseAccelleration(sigma_a)
 measurement_model = measurementmodels.CartesianPosition(sigma_z)
@@ -136,12 +140,13 @@ tracker_update_list = []
 tracker_predict_list = []
 # estimate
 for k, (Zk, x_true_k) in enumerate(zip(Z, Xgt)):
-    tracker_predict = tracker.predict(tracker_update, Ts=Ts)  # TODO
-    tracker_update = tracker.update(Zk, tracker_predict)  # TODO
+    tracker_predict = tracker.predict(tracker_update, Ts=Ts)
+    tracker_update = tracker.update(Zk, tracker_predict)
     x_est, P_est = tracker_update.mean, tracker_predict.cov
-    NEES[k] = tracker.state_filter.NEES_from_gt(x_est, x_true_k[:4], P_est)  # TODO
-    NEESpos[k] = tracker.state_filter.NEES_from_gt(x_est[:2], x_true_k[:2], P_est[:2, :2])  # TODO
-    NEESvel[k] = tracker.state_filter.NEES_from_gt(x_est[2:4], x_true_k[2:4], P_est[2:, 2:])  # TODO
+    # mahalanobis_distance_squared(x_true_k, x_bar, P_bar)
+    NEES[k] = tracker.state_filter.NEES_from_gt(x_est, x_true_k[:4], P_est)
+    NEESpos[k] = tracker.state_filter.NEES_from_gt(x_est[:2], x_true_k[:2], P_est[:2, :2])
+    NEESvel[k] = tracker.state_filter.NEES_from_gt(x_est[2:4], x_true_k[2:4], P_est[2:, 2:])
 
     tracker_predict_list.append(tracker_predict)
     tracker_update_list.append(tracker_update)
@@ -150,8 +155,9 @@ x_hat = np.array([upd.mean for upd in tracker_update_list])
 # calculate a performance metric
 pos_bar_squared = (x_hat[:, 0]-Xgt[:, 0])**2 + (x_hat[:, 1]-Xgt[:, 1])**2
 vel_bar_squared = (x_hat[:, 2]-Xgt[:, 2])**2 + (x_hat[:, 3]-Xgt[:, 3])**2
-posRMSE = np.sqrt(np.mean(pos_bar_squared, axis=0, dtype=np.float64))  # TODO: position RMSE
-velRMSE = np.sqrt(np.mean(vel_bar_squared, axis=0, dtype=np.float64))  # TODO: velocity RMSE
+
+posRMSE = np.sqrt(np.mean(pos_bar_squared, axis=0, dtype=np.float64))
+velRMSE = np.sqrt(np.mean(vel_bar_squared, axis=0, dtype=np.float64))
 
 # %% plots
 fig3, ax3 = plt.subplots(num=3, clear=True)
@@ -163,29 +169,28 @@ ax3.set_title(
 
 fig4, axs4 = plt.subplots(3, sharex=True, num=4, clear=True)
 
-confprob = 0.95  # TODO: probability for confidence interval
-CI2 = np.array(scipy.stats.chi2.interval(confprob, 2))  # TODO: confidence interval for NEESpos and NEESvel
-CI4 = np.array(scipy.stats.chi2.interval(confprob, 4))  # TODO: confidence interval for NEES
+confprob = 0.95
+CI2 = np.array(scipy.stats.chi2.interval(confprob, 2))
+CI4 = np.array(scipy.stats.chi2.interval(confprob, 4))
 
 axs4[0].plot(np.arange(K) * Ts, NEESpos)
-axs4[0].plot([0, (K - 1) * Ts], np.repeat(CI2[0], 2, 0), "--r")
+axs4[0].plot([0, (K - 1) * Ts], np.repeat(CI2[None], 2, 0), "--r")
 axs4[0].set_ylabel("NEES pos")
 inCIpos = np.mean((CI2[0] <= NEESpos) * (NEESpos <= CI2[1]))
 axs4[0].set_title(f"{inCIpos*100:.1f}% inside {confprob*100:.1f}% CI")
 
 axs4[1].plot(np.arange(K) * Ts, NEESvel)
-axs4[1].plot([0, (K - 1) * Ts], np.repeat(CI2[0], 2, 0), "--r")
+axs4[1].plot([0, (K - 1) * Ts], np.repeat(CI2[None], 2, 0), "--r")
 axs4[1].set_ylabel("NEES vel")
 inCIvel = np.mean((CI2[0] <= NEESvel) * (NEESvel <= CI2[1]))
 axs4[1].set_title(f"{inCIvel*100:.1f}% inside {confprob*100:.1f}% CI")
 
 axs4[2].plot(np.arange(K) * Ts, NEESpos)
-axs4[2].plot([0, (K - 1) * Ts], np.repeat(CI4[0], 2, 0), "--r")
+axs4[2].plot([0, (K - 1) * Ts], np.repeat(CI4[None], 2, 0), "--r")
 axs4[2].set_ylabel("NEES")
 inCI = np.mean((CI2[0] <= NEES) * (NEES <= CI2[1]))
 axs4[2].set_title(f"{inCI*100:.1f}% inside {confprob*100:.1f}% CI")
 
-# TODO
 confprob = 0.95
 CI2K = np.array(scipy.stats.chi2.interval(confprob, 2 * K)) / K
 CI4K = np.array(scipy.stats.chi2.interval(confprob, 4 * K)) / K
@@ -204,3 +209,4 @@ axs5[0].set_ylabel("position error")
 axs5[1].plot(np.arange(K) * Ts, np.linalg.norm(x_hat[:, 2:4] - Xgt[:, 2:4], axis=1))
 axs5[1].set_ylabel("velocity error")
 # %%
+plt.show()
