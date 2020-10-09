@@ -219,7 +219,7 @@ axs3[2].set_title("vel error")
 sigma_z = 2.25
 sigma_a_CV = 0.05
 sigma_a_CT = 0.07
-sigma_omega = 0.007  # * np.pi
+sigma_omega = 0.0022 * np.pi
 PI = np.array([[0.95, 0.05], [0.05, 0.95]])
 assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"
 
@@ -288,7 +288,7 @@ axs4[1, 1].legend()
 sigma_z = 2.25
 sigma_a_CV = 0.05
 sigma_a_CT = 0.07
-sigma_omega = 0.0225  # * np.pi
+sigma_omega = 0.0073 * np.pi
 PI = np.array([[0.95, 0.05], [0.05, 0.95]])
 assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"
 
