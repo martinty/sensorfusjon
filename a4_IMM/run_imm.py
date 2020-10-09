@@ -16,6 +16,8 @@ import imm
 import ekf
 import estimationstatistics as estats
 
+# pylint: disable=unsubscriptable-object
+
 # %% plot config check and style setup
 
 # to see your plot config
@@ -89,6 +91,7 @@ else:
 
 
 fig1, ax1 = plt.subplots(num=1, clear=True)
+plt.title('data_for_imm.mat')
 ax1.plot(*Xgt.T[:2])
 ax1.scatter(*Z.T[:2])
 
@@ -96,10 +99,10 @@ ax1.scatter(*Z.T[:2])
 # %% tune single filters
 
 # parameters
-sigma_z = 3
-sigma_a_CV = 0.3
-sigma_a_CT = 0.1
-sigma_omega = 0.002 * np.pi
+sigma_z = 2.25
+sigma_a_CV = 0.22
+sigma_a_CT = 0.07
+sigma_omega = 0.0016 * np.pi
 
 # initial values
 init_mean = np.array([0, 0, 2, 0, 0])
@@ -181,7 +184,7 @@ CIANIS = np.array(scipy.stats.chi2.interval(0.9, K * 2)) / K
 print(f"ANIS={ANIS} with CIANIS={CIANIS}")
 
 
-# plot
+# plot single filters (fig2 and fig3)
 fig2, axs2 = plt.subplots(2, 2, num=2, clear=True)
 for axu, axl, u_s, rmse_pred, rmse_upd in zip(
     axs2[0], axs2[1], upd, RMSE_pred, RMSE_upd
@@ -213,10 +216,10 @@ axs3[2].plot(np.arange(K) * Ts, err_upd[:, 1].T)
 axs3[2].set_title("vel error")
 
 # %% tune IMM by only looking at the measurements
-sigma_z = 3
-sigma_a_CV = 0.2
-sigma_a_CT = 0.1
-sigma_omega = 0.002 * np.pi
+sigma_z = 2.25
+sigma_a_CV = 0.05
+sigma_a_CT = 0.07
+sigma_omega = 0.007  # * np.pi
 PI = np.array([[0.95, 0.05], [0.05, 0.95]])
 assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"
 
@@ -262,7 +265,7 @@ CINIS = np.array(scipy.stats.chi2.interval(0.9, 2))
 CIANIS = np.array(scipy.stats.chi2.interval(0.9, 2 * K)) / K
 print(f"ANIS={ANIS} with CIANIS={CIANIS}")
 
-# plot
+# plot IMM by only looking at the measurements (fig4)
 fig4, axs4 = plt.subplots(2, 2, num=4, clear=True)
 axs4[0, 0].plot(*x_est.T[:2], label="est", color="C0")
 axs4[0, 0].scatter(*Z.T, label="z", color="C1")
@@ -282,10 +285,10 @@ axs4[1, 1].text(K * Ts * 1.1, 1, f"{ratio_in_CI} inside CI", rotation=90)
 axs4[1, 1].legend()
 
 # %% tune IMM by looking at ground truth
-sigma_z = 3
-sigma_a_CV = 0.2
-sigma_a_CT = 0.1
-sigma_omega = 0.002 * np.pi
+sigma_z = 2.25
+sigma_a_CV = 0.05
+sigma_a_CT = 0.07
+sigma_omega = 0.0225  # * np.pi
 PI = np.array([[0.95, 0.05], [0.05, 0.95]])
 assert np.allclose(PI.sum(axis=1), 1), "rows of PI must sum to 1"
 
@@ -382,7 +385,8 @@ vel_peak_deviation = vel_err.max()
 
 rmsestr = ", ".join(f"{num:.3f}" for num in (pos_RMSE, vel_RMSE))
 devstr = ", ".join(f"{num:.3f}" for num in (pos_peak_deviation, vel_peak_deviation))
-# plot
+
+# plot IMM by looking at ground truth (fig5 and fig6)
 fig5, axs5 = plt.subplots(2, 2, num=5, clear=True)
 axs5[0, 0].plot(*x_hat.T[:2], label="est", color="C0")
 axs5[0, 0].scatter(*Z.T, label="z", color="C1")
