@@ -4,6 +4,7 @@
         "**/.git/subtree-cache/**": true,
         "**/node_modules/**": true,
         "**/.hg/store/**": true,
-        "**/env/**": true
+        "**/env/**": true,
+        "**/projects/venv**": true
     }
 }
